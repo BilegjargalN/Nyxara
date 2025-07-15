@@ -50,7 +50,7 @@ Securely enter your API key to connect with AI services.
 
 Choose which AI model (e.g., DeepSeek, OpenAI, Gemini) to use in your story.
 
-![Model Settings](screenshots/nyxara_model_settings.png)  
+![Model Settings](screenshots/nyxara_model_setting.png)  
 *Figure 5: Model selection screen.*
 
 ## Project Structure
