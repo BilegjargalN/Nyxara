@@ -1,8 +1,8 @@
 # Nyxara: Apophasis
 
-Nyxara: Apophasis is an immersive, AI-powered visual novel where players must use their wits and words to escape a mystical dungeon. The primary guardian, Nyx, is a powerful and unpredictable entity whose form and disposition change based on the player's interactions.
+**Nyxara: Apophasis** is an immersive, AI-powered visual novel where players must use their wits and words to escape a mystical dungeon. The primary guardian, **Nyx**, is a powerful and unpredictable entity whose form and disposition change based on the player's interactions.
 
-This project is built with a vanilla PHP backend and a JavaScript frontend, designed to be a lightweight and engaging web experience.
+This project is built with a **vanilla PHP backend** and a **JavaScript frontend**, designed to be a lightweight and engaging web experience.
 
 ![Screenshot of Dialogue](screenshots/example_dialogue.png)
 
@@ -10,23 +10,48 @@ This project is built with a vanilla PHP backend and a JavaScript frontend, desi
 
 - **Dynamic AI Storyteller:** The narrative is driven by a flexible AI backend that can connect to various services (DeepSeek, OpenAI, Gemini).
 - **Evolving Character:** Nyx's personality and physical form change in response to the player's dialogue choices and actions.
-- **Stateful Gameplay:** The game tracks key story events, relationship scores, and a countdown timer that adds urgency to the escape.
-- **Secure User System:** Includes user registration, login, and secure, encrypted storage for user-provided API keys.
-- **Modern UI:** A clean, responsive user interface designed for an immersive visual novel experience.
+- **Stateful Gameplay:** Tracks key story events, relationship scores, and a countdown timer for urgency.
+- **Secure User System:** User registration, login, and encrypted API key storage.
+- **Modern UI:** Clean, responsive user interface designed for immersive storytelling.
 
-## Screenshots
+## Walkthrough with Screenshots
 
-| Registration | Login |
-| :---: | :---: |
-| ![Registration Screen](screenshots/reg.png) | ![Login Screen](screenshots/login.png) |
+A visual guide to using the platform:
 
-| Dashboard & API Icon | API Key Settings |
-| :---: | :---: |
-| ![Dashboard](screenshots/dashboard_api_icon.png) | ![API Settings](screenshots/api_settings.png) |
+### 1. Registration
 
-| Model Selection |
-| :---: |
-| ![Model Settings](screenshots/model_settings.png) |
+Start by creating your account.
+
+![Registration Screen](screenshots/reg.png)  
+*Figure 1: Registration screen.*
+
+### 2. Login
+
+Log in with your newly created credentials.
+
+![Login Screen](screenshots/login.png)  
+*Figure 2: Login screen.*
+
+### 3. Dashboard & API Access
+
+After logging in, you’re taken to the dashboard where you can access API settings and model options.
+
+![Dashboard](screenshots/dashboard_api_icon.png)  
+*Figure 3: Dashboard view.*
+
+### 4. API Key Settings
+
+Securely enter your API key to connect with AI services.
+
+![API Settings](screenshots/api_settings.png)  
+*Figure 4: API key input screen.*
+
+### 5. Model Selection
+
+Choose which AI model (e.g., DeepSeek, OpenAI, Gemini) to use in your story.
+
+![Model Settings](screenshots/model_settings.png)  
+*Figure 5: Model selection screen.*
 
 ## Project Structure
 
