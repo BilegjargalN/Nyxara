@@ -1,0 +1,20 @@
+# Sensitive environment variables
+.env
+
+# Log files
+logs/*.log
+!logs/.gitkeep
+
+# VSCode settings
+.vscode/
+
+# Composer dependencies
+/vendor/
+
+# NPM dependencies
+/node_modules/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp

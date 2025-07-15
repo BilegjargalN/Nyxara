@@ -1,0 +1,111 @@
+```json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"I am Nyx, the shadow that walks beside you. And you... you are lost, aren't you?"},
+        {"speaker":"Narrator", "text":"The voice in your head chuckles darkly, echoing as if from a great distance."},
+        {"speaker":"Nyx", "text":"As for the voice... well, some questions are better left unanswered."}
+    ],
+    "time_cost": 3
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"I am Nyx, the shadow that walks beside you. And you... you are lost, aren't you?"},
+        {"speaker":"Narrator", "text":"The voice in your head chuckles darkly. *Who am I? The one who knows your every thought, little wanderer.*"},
+        {"speaker":"Nyx", "text":"Ignore the whispers. Focus on me. Your survival depends on it."}
+    ],
+    "time_cost": 3
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"I am Nyx, the shadow that walks beside you. And you... you are lost, aren't you?"},
+        {"speaker":"Narrator", "text":"The voice in your head chuckles darkly, echoing through your skull like distant thunder."},
+        {"speaker":"Narrator", "text":"As for me... I am the one who watches. The one who knows."}
+    ],
+    "time_cost": 3
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Narrator", "text":"You hurl the stick at Nyx with surprising accuracy."},
+        {"speaker":"Nyx", "text":"Ow! What was that for?"},
+        {"speaker":"Narrator", "text":"Nyx rubs their head, glaring at you."}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Hey! What was that for?"},
+        {"speaker":"Narrator", "text":"The stick bounces harmlessly off Nyx's shoulder."},
+        {"speaker":"Nyx", "text":"If you wanted my attention, you could've just said so."}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Hey! What was that for?"},
+        {"speaker":"Narrator", "text":"The stick bounces harmlessly off Nyx's shoulder."},
+        {"speaker":"Nyx", "text":"If you wanted my attention, you could've just said so..."}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Ah, a mystery to unravel! But in this realm, names are forged by choices, not given. What shall I call you, wanderer?"},
+        {"speaker":"Narrator", "text":"The void echoes with possibility, waiting for your declaration."}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Hmm, I don't actually know your name yet."},
+        {"speaker":"Nyx", "text":"But I'd love to learn it! What should I call you?"}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"I don't actually know your name yet, traveler. But I'd love to learn it."},
+        {"speaker":"Narrator", "text":"The shadowy figure tilts their head curiously, waiting for your response."}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Hmm, I don't recall you telling me your name yet."},
+        {"speaker":"Narrator", "text":"The air hums with anticipation as Nyx waits for your response."}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Hmm, I don't recall you telling me your name. Would you like to share it?"},
+        {"speaker":"Narrator", "text":"The air hums with anticipation as Nyx awaits your response."}
+    ],
+    "time_cost": 2
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Hello there, traveler. What brings you to these parts?"},
+        {"speaker":"Narrator", "text":"The wind howls softly as Nyx awaits your response."}
+    ],
+    "time_cost": 1
+}
+``````json
+{
+    "dialogue": [
+        {"speaker":"Nyx", "text":"Hello there, traveler. What brings you to this realm?"},
+        {"speaker":"Narrator", "text":"The air hums with an eerie energy as Nyx studies you intently."}
+    ],
+    "time_cost": 2
+}
+```
