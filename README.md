@@ -4,7 +4,7 @@
 
 This project is built with a **vanilla PHP backend** and a **JavaScript frontend**, designed to be a lightweight and engaging web experience.
 
-![Screenshot of Dialogue](screenshots/example_dialogue.png)
+![Screenshot of Dialogue](screenshots/nyxara_example_dialogue.png)
 
 ## Features
 
@@ -22,35 +22,35 @@ A visual guide to using the platform:
 
 Start by creating your account.
 
-![Registration Screen](screenshots/reg.png)  
+![Registration Screen](screenshots/nyxara_reg.png)  
 *Figure 1: Registration screen.*
 
 ### 2. Login
 
 Log in with your newly created credentials.
 
-![Login Screen](screenshots/login.png)  
+![Login Screen](screenshots/nyxara_login.png)  
 *Figure 2: Login screen.*
 
 ### 3. Dashboard & API Access
 
 After logging in, you’re taken to the dashboard where you can access API settings and model options.
 
-![Dashboard](screenshots/dashboard_api_icon.png)  
+![Dashboard](screenshots/nyxara_dashboard_API_icon.png)  
 *Figure 3: Dashboard view.*
 
 ### 4. API Key Settings
 
 Securely enter your API key to connect with AI services.
 
-![API Settings](screenshots/api_settings.png)  
+![API Settings](screenshots/nyxara_API_settings.png)  
 *Figure 4: API key input screen.*
 
 ### 5. Model Selection
 
 Choose which AI model (e.g., DeepSeek, OpenAI, Gemini) to use in your story.
 
-![Model Settings](screenshots/model_settings.png)  
+![Model Settings](screenshots/nyxara_model_settings.png)  
 *Figure 5: Model selection screen.*
 
 ## Project Structure
