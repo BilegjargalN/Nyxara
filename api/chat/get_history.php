@@ -38,21 +38,10 @@ try {
     $stmt->bindValue(2, $limit, PDO::PARAM_INT);
     $stmt->bindValue(3, $offset, PDO::PARAM_INT);
     $stmt->execute();
-    $history = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-    $formatted_history = [];
-    foreach ($history as $interaction) {
-        $formatted_history[] = ['speaker' => 'You', 'text' => $interaction['input']];
-        $response_data = json_decode($interaction['response'], true);
-        if ($response_data && isset($response_data['dialogue'])) {
-            foreach ($response_data['dialogue'] as $dialogue) {
-                $formatted_history[] = ['speaker' => $dialogue['speaker'], 'text' => $dialogue['text']];
-            }
-        }
-    }
+    $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     ob_clean(); // Clean the buffer before output
-    echo json_encode(['success' => true, 'history' => $formatted_history]);
+    echo json_encode(['success' => true, 'history' => $history]);
 
 } catch (Exception $e) {
     ob_clean(); // Clean the buffer in case of an error

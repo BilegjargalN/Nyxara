@@ -8,7 +8,6 @@ require_once __DIR__ . '/env_loader.php';
 // Set default timezone
 date_default_timezone_set('UTC');
 
-// Database credentials
 $host = getenv('DB_HOST') ?: '127.0.0.1';
 $dbname = getenv('DB_NAME') ?: 'nyxara2';
 $user = getenv('DB_USER') ?: 'root';

@@ -52,7 +52,6 @@ try {
         throw new Exception("User input is too long. Please keep it under 2000 characters.");
     }
 
-    // Fetch and decrypt user's API keys
     $stmt = $pdo->prepare("SELECT api_key_encrypted FROM Users WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $row = $stmt->fetch();
@@ -93,7 +92,6 @@ try {
         'time_remaining' => 300, 'story_events' => [], 'first_meeting' => true
     ];
 
-    // Fetch context from database
     $stmt = $pdo->prepare("SELECT save_data FROM Game_Progress WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $row = $stmt->fetch();
@@ -139,6 +137,11 @@ RESPONSE FORMAT (JSON ONLY):
         {"speaker": "Nyx", "text": "Long, detailed character dialogue..."},
         {"speaker": "Narrator", "text": "Rich atmospheric description..."}
     ],
+    "choices": [
+        {"text": "A short, distinct choice for the player."},
+        {"text": "A second, different choice."},
+        {"text": "A third, contrasting choice."}
+    ],
     "form_change": "human_neutral",
     "relationship_change": 0,
     "time_cost": 10,
@@ -148,7 +151,6 @@ RESPONSE FORMAT (JSON ONLY):
 Player Input: {$input['input']}
 EOD;
 
-    // ===== API CALL using Service Abstraction =====
     $raw_content = null;
     try {
         $ai_service = ServiceFactory::create($provider);
@@ -168,6 +170,7 @@ EOD;
         error_log(date('[Y-m-d H:i:s] ')."Invalid JSON from {$provider}: $clean_json\n", 3, INVALID_RESP_LOG);
         $game_data = [
             'dialogue' => [['speaker' => 'Nyx', 'text' => 'I watch you carefully...'], ['speaker' => 'Narrator', 'text' => 'The dungeon air grows heavy...']],
+            'choices' => [['text' => 'Wait and see what happens.'], ['text' => 'Say something.']],
             'form_change' => $context['nyx_form'], 'relationship_change' => 0, 'time_cost' => 10, 'story_event' => 'Tense standoff'
         ];
     }
@@ -210,7 +213,7 @@ EOD;
     }
 
     ob_clean();
-    echo json_encode(['success' => true, 'dialogue' => $game_data['dialogue'], 'context' => $context]);
+    echo json_encode(['success' => true, 'dialogue' => $game_data['dialogue'], 'choices' => $game_data['choices'] ?? [], 'context' => $context]);
 
 } catch (Exception $e) {
     ob_clean();

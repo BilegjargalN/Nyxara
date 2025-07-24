@@ -1,0 +1,263 @@
+
+:root {
+    --nyx-purple: #8e44ad;
+    --nyx-purple-glow: rgba(142, 68, 173, 0.6);
+    --ethereal-blue: #3498db;
+    --ethereal-blue-glow: rgba(52, 152, 219, 0.5);
+    --dungeon-bg: #0a0a0a;
+    --stone-gray: #2c3e50;
+    --silver-accent: #bdc3c7;
+    --chat-bg: rgba(10, 10, 10, 0.85);
+    --text-outline: -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000, 1px 1px 2px #000;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    color: #f8f9fa;
+    background-color: var(--dungeon-bg);
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1060; /* Higher than modal */
+}
+
+.vn-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../nyx/dungeon_background.png') no-repeat center center;
+    background-size: cover;
+    filter: blur(2px) brightness(0.6);
+    z-index: -1;
+}
+
+.game-container {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr 300px;
+    grid-template-areas:
+        "top-hud top-hud"
+        "main main"
+        "dialogue sidebar";
+    height: 100vh;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.top-hud {
+    grid-area: top-hud;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-vn-area {
+    grid-area: main;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.dialogue-choice-container {
+    grid-area: dialogue;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.choices-sidebar {
+    grid-area: sidebar;
+    background: rgba(0,0,0,0.5);
+    border-radius: 15px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--stone-gray);
+}
+
+.character-sprite {
+    position: absolute;
+    bottom: -5%;
+    height: 100%;
+    max-height: 90vh;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+#nyxCharacter {
+    height: 100%;
+    object-fit: contain;
+    transform: translateX(-15%);
+}
+
+.caption-overlay {
+    padding: 1.5rem 2rem;
+    color: white;
+    text-align: center;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Align text to bottom */
+    position: relative;
+}
+
+.speaker-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    color: var(--nyx-purple);
+    text-shadow: var(--text-outline);
+    margin-bottom: 0.5rem;
+}
+
+.message-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    text-shadow: var(--text-outline);
+    min-height: 50px;
+}
+
+.continue-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    animation: bounce 2s infinite;
+    cursor: pointer;
+    text-shadow: var(--text-outline);
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.custom-input-area {
+    display: flex;
+    background: var(--chat-bg);
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--stone-gray);
+    border-radius: 15px;
+    margin-top: 1rem;
+}
+
+#userInput {
+    flex-grow: 1;
+    background: rgba(44, 62, 80, 0.9);
+    border: 1px solid #555;
+    color: #fff;
+    border-radius: 12px;
+    resize: none;
+}
+
+.send-button {
+    background: var(--nyx-purple);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+    padding: 0 1.2rem;
+}
+
+.choice-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, var(--stone-gray), #1e2b38);
+    border: 1px solid #444;
+    color: white;
+    border-radius: 8px;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.choice-btn:hover {
+    background: var(--nyx-purple);
+    transform: translateX(5px);
+}
+
+.choice-btn.custom-choice {
+    margin-top: auto;
+    background: transparent;
+    border: 1px dashed var(--nyx-purple);
+    text-align: center;
+}
+.choice-btn.custom-choice:hover {
+    background: var(--nyx-purple);
+}
+
+/* HUD Styles */
+.game-title-hud { font-family: 'Orbitron', monospace; font-weight: 700; color: var(--ethereal-blue); }
+.hud-stats { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.stat-item { display: flex; align-items: center; gap: 0.5rem; background: rgba(44, 62, 80, 0.8); padding: 0.4rem 0.8rem; border-radius: 10px; }
+.stat-icon { color: var(--silver-accent); }
+.stat-value { font-weight: 600; color: #fff; font-size: 0.9rem; }
+
+/* History Modal */
+#historyModalBody {
+    font-size: 0.9rem;
+}
+.history-item {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #444;
+}
+.history-item:last-child {
+    border-bottom: none;
+}
+.history-speaker-you {
+    color: var(--ethereal-blue);
+    font-weight: bold;
+}
+.history-speaker-nyx {
+    color: var(--nyx-purple);
+    font-weight: bold;
+}
+.history-speaker-narrator {
+    color: var(--silver-accent);
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .game-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto auto;
+        grid-template-areas:
+            "top-hud"
+            "main"
+            "dialogue"
+            "sidebar";
+    }
+    #nyxCharacter {
+        transform: translateX(0);
+    }
+    .choices-sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .choice-btn {
+        flex-basis: 48%;
+    }
+    .choice-btn.custom-choice {
+        margin-top: 0;
+        flex-basis: 100%;
+    }
+}

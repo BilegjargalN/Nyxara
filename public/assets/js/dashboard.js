@@ -1,240 +1,296 @@
-console.log('>>>> dashboard.js HAS LOADED <<<<');
-
 const sessionToken = localStorage.getItem('session_token');
 if (!sessionToken) {
     window.location.href = 'index.html';
 }
 
-// --- Standardized Fetch Function ---
 async function fetchApi(url, options = {}) {
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${sessionToken}`,
         ...options.headers,
     };
-
     const response = await fetch(url, { ...options, headers });
-
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Invalid JSON response from server.' }));
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
-
     return response.json();
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    const chatHistoryDiv = document.getElementById('chatHistory');
-    const sendButton = document.getElementById('sendButton');
-    const typingIndicator = document.getElementById('typingIndicator');
-    const apiProviderSelect = document.getElementById('apiProvider');
-    const deepseekKeyInput = document.getElementById('deepseekKey');
-    const openAIKeyInput = document.getElementById('openAIKey');
-    const geminiKeyInput = document.getElementById('geminiKey');
-    const apiKeyAlert = document.getElementById('apiKeyAlert');
-    const saveKeysButton = document.getElementById('saveKeysButton');
-    const userInput = document.getElementById('userInput');
-    const apiSettingsModalEl = document.getElementById('apiSettingsModal');
-    const apiSettingsModal = new bootstrap.Modal(apiSettingsModalEl);
-    const timerEl = document.getElementById('timer');
-    const relationshipEl = document.getElementById('relationship');
-    const nyxFormEl = document.getElementById('nyxForm');
-    const nyxCharacterEl = document.getElementById('nyxCharacter');
-    const showOlderMessagesButton = document.createElement('button');
+    const elements = {
+        loadingOverlay: document.getElementById('loadingOverlay'),
+        apiProvider: document.getElementById('apiProvider'),
+        timer: document.getElementById('timer'),
+        relationship: document.getElementById('relationship'),
+        nyxCharacter: document.getElementById('nyxCharacter'),
+        speakerName: document.getElementById('speakerName'),
+        messageText: document.getElementById('messageText'),
+        continueBtn: document.getElementById('continueBtn'),
+        choicesSidebar: document.getElementById('choicesSidebar'),
+        choiceList: document.getElementById('choiceList'),
+        customResponseBtn: document.getElementById('customResponseBtn'),
+        customInputArea: document.getElementById('customInputArea'),
+        userInput: document.getElementById('userInput'),
+        sendCustomBtn: document.getElementById('sendCustomBtn'),
+        apiSettingsModalEl: document.getElementById('apiSettingsModal'),
+        historyModalEl: document.getElementById('historyModal'),
+        historyModalBody: document.getElementById('historyModalBody'),
+        deepseekKeyInput: document.getElementById('deepseekKey'),
+        openAIKeyInput: document.getElementById('openAIKey'),
+        geminiKeyInput: document.getElementById('geminiKey'),
+        apiKeyAlert: document.getElementById('apiKeyAlert'),
+        saveKeysButton: document.getElementById('saveKeysButton'),
+    };
+    
+    const apiSettingsModal = new bootstrap.Modal(elements.apiSettingsModalEl);
+    const historyModal = new bootstrap.Modal(elements.historyModalEl);
 
-    let currentHistoryOffset = 0;
-    const historyLimitPerPage = 10;
+    let dialogueQueue = [];
+    let currentDialogueIndex = 0;
+    let isProcessing = false;
+    let lastApiResponse = {};
 
-    // === Functions ===
-    function formatTime(seconds) {
-        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const secs = (seconds % 60).toString().padStart(2, '0');
-        return `${mins}:${secs}`;
+    function typeWriter(text, element, callback) {
+        element.innerHTML = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        if (callback) callback();
     }
 
-    function formatMessageText(text) {
-        let sanitizedText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        return sanitizedText.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-    }
-
-    function appendMessage(speaker, text, prepend = false) {
-        const div = document.createElement('div');
-        let bubbleClass = 'narrator-bubble'; // Default
-        if (speaker.toLowerCase() === 'nyx') bubbleClass = 'nyx-bubble';
-        if (speaker.toLowerCase() === 'you') bubbleClass = 'user-bubble';
-        if (speaker.toLowerCase() === 'system') bubbleClass = 'narrator-bubble text-danger';
-
-
-        div.className = `chat-bubble ${bubbleClass}`;
-        div.innerHTML = `
-            <div class="speaker-name">${speaker}</div>
-            <div class="message-text">${formatMessageText(text)}</div>
-        `;
-        if (prepend) {
-            const button = chatHistoryDiv.querySelector('#showOlderMessages');
-            if (button) {
-                button.after(div);
-            } else {
-                chatHistoryDiv.prepend(div);
-            }
-        } else {
-            chatHistoryDiv.appendChild(div);
+    function updateCharacter(context) {
+        if (!context) return;
+        const newSrc = `assets/nyx/${context.nyx_form}.png`;
+        if (elements.nyxCharacter.src !== newSrc) {
+            elements.nyxCharacter.style.opacity = 0;
+            setTimeout(() => {
+                elements.nyxCharacter.src = newSrc;
+                elements.nyxCharacter.style.opacity = 1;
+            }, 300);
         }
     }
 
-    async function loadChatHistory(offset, limit, prepend = false) {
-        try {
-            const data = await fetchApi('/Nyxara2/api/chat/get_history.php', {
-                method: 'POST',
-                body: JSON.stringify({ offset, limit })
+    function updateHUD(context) {
+        if (!context) return;
+        elements.timer.textContent = formatTime(context.time_remaining);
+        elements.relationship.textContent = context.relationship_score;
+    }
+
+    function processDialogueQueue() {
+        elements.continueBtn.style.display = 'none';
+        if (currentDialogueIndex >= dialogueQueue.length) {
+            if (lastApiResponse.choices) {
+                displayChoices(lastApiResponse.choices);
+            }
+            return;
+        }
+        const currentItem = dialogueQueue[currentDialogueIndex];
+        elements.speakerName.textContent = currentItem.speaker;
+        typeWriter(currentItem.text, elements.messageText, () => {
+            elements.continueBtn.style.display = 'block';
+        });
+        currentDialogueIndex++;
+    }
+
+    function displayChoices(choices) {
+        elements.choiceList.innerHTML = '';
+        if (choices && choices.length > 0) {
+            choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.textContent = choice.text;
+                button.onclick = () => onChoiceClick(choice.text);
+                elements.choiceList.appendChild(button);
             });
-
-            if (data.success && data.history) {
-                if (data.history.length < limit) {
-                    showOlderMessagesButton.style.display = 'none';
-                } else {
-                    showOlderMessagesButton.style.display = 'block';
-                }
-
-                if (prepend) {
-                    data.history.reverse().forEach(msg => appendMessage(msg.speaker, msg.text, true));
-                } else {
-                    data.history.forEach(msg => appendMessage(msg.speaker, msg.text));
-                    chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
-                }
-                currentHistoryOffset += data.history.length;
-            }
-        } catch (e) {
-            console.error('Error loading chat history:', e);
-            appendMessage('System', `Error: ${e.message}`, !prepend);
         }
+        elements.choicesSidebar.style.display = 'flex';
+    }
+
+    async function sendMessage(messageText) {
+        if (!messageText.trim() || isProcessing) return;
+        isProcessing = true;
+        elements.choicesSidebar.style.display = 'none';
+        elements.customInputArea.style.display = 'none';
+        elements.speakerName.textContent = '';
+        elements.messageText.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
+
+        try {
+            const data = await fetchApi('/NyxaraCopy/api/chat/send.php', {
+                method: 'POST',
+                body: JSON.stringify({ input: messageText, provider: elements.apiProvider.value })
+            });
+            lastApiResponse = data;
+            updateHUD(data.context);
+            updateCharacter(data.context);
+            if (data.dialogue && data.dialogue.length > 0) {
+                dialogueQueue = data.dialogue;
+                currentDialogueIndex = 0;
+                processDialogueQueue();
+            } else {
+                showError('No dialogue received from the server.');
+            }
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            isProcessing = false;
+        }
+    }
+    
+    function showError(message) {
+        elements.speakerName.textContent = 'System Error';
+        elements.messageText.textContent = message;
+        elements.choicesSidebar.style.display = 'flex';
     }
 
     async function saveApiKeys() {
-        const originalButtonText = saveKeysButton.innerHTML;
-        saveKeysButton.disabled = true;
-        saveKeysButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+        const originalButtonText = elements.saveKeysButton.innerHTML;
+        elements.saveKeysButton.disabled = true;
+        elements.saveKeysButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
 
         try {
-            await fetchApi('/Nyxara2/api/user/save_api_keys.php', {
+            await fetchApi('/NyxaraCopy/api/user/save_api_keys.php', {
                 method: 'POST',
                 body: JSON.stringify({
                     keys: {
-                        deepseek: deepseekKeyInput.value,
-                        openai: openAIKeyInput.value,
-                        gemini: geminiKeyInput.value
+                        deepseek: elements.deepseekKeyInput.value,
+                        openai: elements.openAIKeyInput.value,
+                        gemini: elements.geminiKeyInput.value
                     }
                 })
             });
 
-            apiKeyAlert.className = 'alert alert-success';
-            apiKeyAlert.textContent = 'API keys saved successfully!';
-            apiKeyAlert.style.display = 'block';
+            elements.apiKeyAlert.className = 'alert alert-success';
+            elements.apiKeyAlert.textContent = 'API keys saved successfully!';
+            elements.apiKeyAlert.style.display = 'block';
 
             setTimeout(() => {
                 apiSettingsModal.hide();
             }, 1500);
 
         } catch (error) {
-            apiKeyAlert.className = 'alert alert-danger';
-            apiKeyAlert.textContent = 'Error: ' + error.message;
-            apiKeyAlert.style.display = 'block';
+            elements.apiKeyAlert.className = 'alert alert-danger';
+            elements.apiKeyAlert.textContent = 'Error: ' + error.message;
+            elements.apiKeyAlert.style.display = 'block';
         } finally {
-            saveKeysButton.disabled = false;
-            saveKeysButton.innerHTML = originalButtonText;
+            elements.saveKeysButton.disabled = false;
+            elements.saveKeysButton.innerHTML = originalButtonText;
             setTimeout(() => {
-                apiKeyAlert.style.display = 'none';
+                elements.apiKeyAlert.style.display = 'none';
             }, 4000);
         }
     }
 
-    async function sendMessage() {
-        const messageText = userInput.value;
-        if (!messageText.trim()) return;
+    function onChoiceClick(choiceText) {
+        sendMessage(choiceText);
+    }
 
-        sendButton.disabled = true;
-        sendButton.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
-        typingIndicator.style.display = 'block';
+    elements.continueBtn.addEventListener('click', () => processDialogueQueue());
+    elements.customResponseBtn.addEventListener('click', () => {
+        elements.customInputArea.style.display = 'flex';
+        elements.userInput.focus();
+    });
+    elements.sendCustomBtn.addEventListener('click', () => {
+        sendMessage(elements.userInput.value);
+        elements.userInput.value = '';
+    });
+    elements.userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(elements.userInput.value);
+            elements.userInput.value = '';
+        }
+    });
 
-        appendMessage('You', messageText);
-        userInput.value = '';
-        userInput.style.height = 'auto';
-        chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+    elements.saveKeysButton.addEventListener('click', saveApiKeys);
 
+    elements.apiSettingsModalEl.addEventListener('show.bs.modal', async () => {
+        elements.apiKeyAlert.style.display = 'none';
         try {
-            const data = await fetchApi('/Nyxara2/api/chat/send.php', {
-                method: 'POST',
-                body: JSON.stringify({
-                    input: messageText,
-                    provider: apiProviderSelect.value
-                })
-            });
-
-            if (data.dialogue) {
-                data.dialogue.forEach(msg => appendMessage(msg.speaker, msg.text));
+            const data = await fetchApi('/NyxaraCopy/api/user/get_api_keys.php');
+            if (data.success && data.keys) {
+                elements.deepseekKeyInput.value = data.keys.deepseek || '';
+                elements.openAIKeyInput.value = data.keys.openai || '';
+                elements.geminiKeyInput.value = data.keys.gemini || '';
             }
+        } catch (e) {
+            elements.apiKeyAlert.className = 'alert alert-danger';
+            elements.apiKeyAlert.textContent = `Error loading keys: ${e.message}`;
+            elements.apiKeyAlert.style.display = 'block';
+        }
+    });
 
-            if (data.context) {
-                timerEl.textContent = formatTime(data.context.time_remaining);
-                relationshipEl.textContent = data.context.relationship_score;
-                const formName = data.context.nyx_form.split('_')[0];
-                nyxFormEl.textContent = formName.charAt(0).toUpperCase() + formName.slice(1);
-                nyxCharacterEl.src = `assets/nyx/${data.context.nyx_form}.png`;
+    elements.historyModalEl.addEventListener('show.bs.modal', async () => {
+        elements.historyModalBody.innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        try {
+            const data = await fetchApi('/NyxaraCopy/api/chat/get_history.php', { method: 'POST' });
+            if (data.success && data.history) {
+                renderHistory(data.history);
+            } else {
+                elements.historyModalBody.textContent = 'Could not load history.';
             }
+        } catch (e) {
+            elements.historyModalBody.textContent = `Error: ${e.message}`;
+        }
+    });
 
+    function renderHistory(history) {
+        elements.historyModalBody.innerHTML = '';
+        if (history.length === 0) {
+            elements.historyModalBody.textContent = 'No history yet.';
+            return;
+        }
+        history.slice().reverse().forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            let content = `<p class="history-speaker-you">You: ${item.input}</p>`;
+            try {
+                const response = JSON.parse(item.response);
+                if(response.dialogue) {
+                    response.dialogue.forEach(d => {
+                        content += `<p class="history-speaker-${d.speaker.toLowerCase()}">${d.speaker}: ${d.text}</p>`;
+                    });
+                }
+            } catch (e) {
+                content += `<p class="history-speaker-narrator">Narrator: (An old memory fades...)</p>`;
+            }
+            div.innerHTML = content;
+            elements.historyModalBody.appendChild(div);
+        });
+    }
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        return `${mins}:${secs}`;
+    }
+
+    async function initializeGame() {
+        try {
+            const initialState = await fetchApi('/NyxaraCopy/api/user/get_initial_state.php');
+            if (initialState.has_history) {
+                lastApiResponse = { choices: initialState.last_choices };
+                updateHUD(initialState.context);
+                updateCharacter(initialState.context);
+                dialogueQueue = initialState.last_dialogue;
+                currentDialogueIndex = 0;
+                processDialogueQueue();
+            } else {
+                startNewGame();
+            }
         } catch (error) {
-            console.error('Error details:', error);
-            appendMessage('System', `Error: ${error.message}`);
+            showError(error.message);
         } finally {
-            sendButton.disabled = false;
-            sendButton.innerHTML = '<i class="bi bi-send-fill me-2"></i>Act';
-            typingIndicator.style.display = 'none';
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+            elements.loadingOverlay.style.display = 'none';
         }
     }
 
-    timerEl.textContent = formatTime(300);
-    relationshipEl.textContent = '0';
-    nyxFormEl.textContent = 'Human';
+    function startNewGame() {
+        elements.speakerName.textContent = 'Narrator';
+        elements.messageText.textContent = 'The cold stone floor sends a shiver through you as you awaken in the oppressive dark of a dungeon cell. Your head throbs. How did you get here?';
+        displayChoices([
+            { text: "Look around the cell." },
+            { text: "Check myself for injuries." },
+            { text: "Shout to see if anyone is there." }
+        ]);
+    }
 
-    showOlderMessagesButton.id = 'showOlderMessages';
-    showOlderMessagesButton.textContent = 'Show Older Messages';
-    showOlderMessagesButton.className = 'btn btn-sm btn-outline-secondary w-100 mb-3';
-    showOlderMessagesButton.style.display = 'none';
-    chatHistoryDiv.prepend(showOlderMessagesButton);
-    showOlderMessagesButton.addEventListener('click', () => {
-        loadChatHistory(currentHistoryOffset, historyLimitPerPage, true)
-    });
-
-    loadChatHistory(currentHistoryOffset, historyLimitPerPage, false);
-
-    sendButton.addEventListener('click', sendMessage);
-    saveKeysButton.addEventListener('click', saveApiKeys);
-
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-
-    userInput.addEventListener('input', () => {
-        userInput.style.height = 'auto';
-        userInput.style.height = userInput.scrollHeight + 'px';
-    });
-
-    apiSettingsModalEl.addEventListener('show.bs.modal', async () => {
-        apiKeyAlert.style.display = 'none';
-        try {
-            const data = await fetchApi('/Nyxara2/api/user/get_api_keys.php', { method: 'POST' });
-            if (data.success && data.keys) {
-                deepseekKeyInput.value = data.keys.deepseek || '';
-                openAIKeyInput.value = data.keys.openai || '';
-                geminiKeyInput.value = data.keys.gemini || '';
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    });
+    initializeGame();
 });

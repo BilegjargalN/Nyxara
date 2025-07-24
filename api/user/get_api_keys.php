@@ -37,7 +37,6 @@ try {
         $keys = decrypt_api_keys($row['api_key_encrypted']);
     }
     
-    // Ensure keys is always an array
     if (!$keys) {
         $keys = ['deepseek' => '', 'openai' => '', 'gemini' => ''];
     }

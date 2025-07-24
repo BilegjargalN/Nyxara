@@ -18,3 +18,6 @@ logs/*.log
 *.tmp
 *.bak
 *.swp
+
+# Gemini agent briefing file
+GEMINI.md

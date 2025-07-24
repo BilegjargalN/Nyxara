@@ -36,17 +36,15 @@ try {
         throw new Exception('Invalid keys format.');
     }
 
-    // Validate individual API keys
     foreach ($keys as $provider => $key) {
         if (!is_string($key)) {
             throw new Exception("API key for $provider must be a string.");
         }
-        if (strlen($key) > 512) { // Increased limit for safety
+        if (strlen($key) > 512) { 
             throw new Exception("API key for $provider is too long.");
         }
     }
 
-    // Encrypt and store API keys
     $encrypted = encrypt_api_keys($keys);
     $stmt = $pdo->prepare('UPDATE Users SET api_key_encrypted = ? WHERE user_id = ?');
     $stmt->execute([$encrypted, $user_id]);
